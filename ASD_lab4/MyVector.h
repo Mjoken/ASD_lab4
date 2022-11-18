@@ -47,7 +47,6 @@ public:
     ~Vector() {
         delete[] arr_;
     }
-    template<typename T>
     friend std::ostream& operator<<(std::ostream& os, const Vector<T>& vec) {
         for (size_t i = 0; i < vec.size(); ++i) os << vec[i] << " ";
         return os;

@@ -1,90 +1,84 @@
 ﻿/*Задание: Задача 10. Дано N-дерево. Найти в дереве самые длинные пути без ветвлений.*/
-/*максРазмер : целое
-началоМаксВетви: узел
-gleb pidor
-проц максВетвь(узел : Узел, началоВетви: Узел, текРазмер: целое)
-  в зависимости от степени узла «узел»
-    если 0:
-      если текРазмер > максРазмер
-        максРазмер = текРазмер
-        началоМаксВетви = началоВетви
-    если 1: максВетвь(единственныйCын, началоВетви, текРазмер + 1)
-    если 2+:
-      для всех сыновей
-        максВетвь(сын, сын, 1)
-
-максВетвь(корень, корень, 1)*/
 #include "MyVector.h"
-
+/*
+Функция userInput
+Проверки ввода типа int
+Ввод: -
+Вывод: переменная типа int
+*/
 int userInput()
 {
     int input = 0;
-    std::cout << "Input value(int) or 0 for leaf: ";
     std::cin >> input;
     while (!(std::cin.good()))
     {
+        std::cout << "Input error! Enter again" << std::endl;
         std::cin.clear();
         std::cin.ignore(32767, '\n');
         std::cin >> input;
     }
     return input;
 }
-/*Класс, определяющий дерево*/
+/*Класс описывающий дерево*/
 class Tree
 {
 public:
+    /* Структура описывающий верщину дерева */
     struct treeNode
     {
         treeNode(int _val, unsigned int countOfSons) : data(_val), count_sons(countOfSons), father(nullptr){}
-        int data;                                               //данные в узле дерева
-        unsigned int count_sons;                                //количество ветвей исходящих от вешины
-        treeNode** sons = new treeNode * [count_sons];          //Массив сыновей
-        treeNode* father;
+        int data;                                               // Данные в узле дерева
+        unsigned int count_sons;                                // Количество ветвей исходящих от вешины (количество сыновей верщины)
+        treeNode** sons = new treeNode * [count_sons];          // Массив сыновей текущей верщины
+        treeNode* father;                                       // Отец текушего верщины
     };
 
-    treeNode* rootTree = nullptr;
-    unsigned int maxWay{ 0 };
-    Vector<int> way;
+    treeNode* rootTree = nullptr;                               // Корень дерева
+    unsigned int maxWay{ 0 };                                   // Длина самого длинного пути в дереве
+    Vector<int> way;                                            // Значения самого длинного пути
 
-    //Функция isEmpty
-    //Возвращает нулевой указатель у корня дерева
+    /*Функция isEmpty
+    Проверяет, существует ли дерево(конкретнее его корень)
+    Ввод: -
+    Вывод: равен ли корень нулевому указателю
+    */
     bool isEmpty()
     {
         return rootTree == nullptr;
     }
 
-    //Функция addNode
-    //Принимает на вход количество сыновей, узел дерева
-    //Функция добавляет новый узел дерева
-    void addNode(int count_sons = 0, treeNode* Node = nullptr)
+    /*Функция addNode
+    Создаёт узел дерева, рекурсивно, в глубину, консольный ввод
+    Ввод: количество сыновей, узел дерева, высота текушего
+    Вывод: -
+    */
+    void addNode(int count_sons = 0, treeNode* Node = nullptr, unsigned int height = 1)
     {
-        unsigned int countOfSons = 0;
-        int val = 0;
-
-        if (isEmpty())                                     //В дереве нет корня
+        unsigned int countOfSons = 0;                           // Число сыновей текущего узла
+        int val = 0;                                            // Целочисленное значение
+        if (isEmpty())                                          // В дереве нет корня
         {
             std::cout << "--------------------------------------------------------" << std::endl;
-            std::cout << "SetRoot:\n";
+            std::cout << "SetRoot: ";
             val = userInput();
-            if (val == 0)                                           //Если значение равно нулю, то корня не существует 
+            if (val == 0)                                       // Если значение корня нулевое, то дерево не существует
             {
                 rootTree = nullptr;
             }
-            else
+            else                                                // значение корня отлично от нуля
             {
-                std::cout << "--------------------------------------------------------" << std::endl;
-                std::cout << "Enter root's number of sons:";    // заявляем о многодетности
+                std::cout << "Enter root's number of sons: ";   
                 countOfSons = userInput();
                 rootTree = new treeNode(val, countOfSons);
-                addNode(countOfSons, rootTree);
+                addNode(countOfSons, rootTree, height+1);       // Рекурсивный вызов функции построения дерева
                 for (size_t i{}; i < countOfSons; i++) {
-                    rootTree->sons[i]->father = rootTree;   //Находим отца Немо
+                    rootTree->sons[i]->father = rootTree;       // Указываем корень как отца его сыновей
                 }
             }
         }
-        else if (!isEmpty())
+        else if (!isEmpty())                                    // В дереве есть корень корня
         {
-            if (count_sons == 0)
+            if (count_sons == 0)                                // Если у узла нет сыновей, то узел - лист дерева
             {
                 Node->sons = nullptr;
             }
@@ -93,25 +87,35 @@ public:
                 for (int i{}; i < count_sons; i++)
                 {
                     std::cout << "--------------------------------------------------------" << std::endl;
-                    std::cout << "Set son " << i + 1 << " val\n";
+                    for (size_t i{}; i < height; i++) {         // Вывод количества чёрточек по глубине/высоте дерева
+                        std::cout << "-";
+                    }
+                    
+                    if (Node->father != nullptr) {              // Ввод значения сыновей
+                        std::cout << "| enter " << Node->data << " son " << i + 1 << " val : "; 
+                    }
+                    else {                                      // Ввод значения сыновей корня
+                        std::cout << "| enter root son " << i + 1 << " val : ";
+                    }
                     val = userInput();
-                    if (val == 0) Node->count_sons = 0;                              //Если введен "0", считается, что сыновей у узла нет
-                    std::cout << "Enter number of sons for " << i + 1 << " son";
+                    if (val == 0) Node->count_sons = 0;         // Если значение ноль, то считаем, что 
+                    std::cout << "number of sons:";
                     if (Node->count_sons != 0) {
                         countOfSons = userInput();
                     }
-                    std::cout << "--------------------------------------------------------" << std::endl;
                     Node->sons[i] = new treeNode(val, countOfSons);
-                    addNode(countOfSons, Node->sons[i]);
                     Node->sons[i]->father = Node;
+                    addNode(countOfSons, Node->sons[i], height+1);
                 }
             }
         }
     }
   
-    //Функция print
-    //Принимает на вход узел и его высоту
-    //Функция печатает дерево на экран
+    /*Функция print
+    Печатает в консоль дерево
+    Ввод: Узел и высота узла
+    Вывод: -
+    */
     void print(treeNode* node, unsigned int height = 0)
     {
         if (isEmpty())
@@ -119,30 +123,31 @@ public:
             std::cout << "--------------------------------------------------------" << std::endl;
             std::cout << "Tree don't exist" << std::endl;
         }
-        else if (!isEmpty())
+        else if (!isEmpty())                                  // Если значение корня нулевое, то дерево не существует
         {
-            for (size_t i{}; i < height; i++) {
+            for (size_t i{}; i < height; i++) {               // Вывод количества чёрточек по глубине/высоте дерева
                 std::cout << "-";
             }
             std::cout << node->data << "| sons : ";
             for (size_t i{}; i < node->count_sons; i++)
             {
-                std::cout << node->sons[i]->data << ", ";
+                std::cout << node->sons[i]->data << ", ";     // Сыновья текущего узла
             }
             std::cout<<std::endl;
 
         }
-        for (size_t i{}; i < node->count_sons; i++) {
+        for (size_t i{}; i < node->count_sons; i++) {         // Рекурсивная печать сыновей
             print(node->sons[i], height + 1);
         }
     }
-    /// <summary>
-    /// Фукнция поиска длинейшего пути без ветвления, получает на вход корень дерева или указатель на
-    /// </summary>
-    /// <param name="node"></param>
+    /*
+    Фукнция поиска длинейшего пути без ветвления, 
+    Ввод: корень дерева или указатель на верщину, текущую длинну пути без ветвления
+    Вывод: -
+    */
     void longestWay(treeNode* node = nullptr, unsigned int waySize=0) {
-        treeNode* cur = nullptr;
-        if (isEmpty())
+        treeNode* cur = nullptr;                              // Указатель на верщину для перемещения по дереву
+        if (isEmpty())                                        // Если значение корня нулевое, то дерево не существует
         {
             std::cout << "--------------------------------------------------------" << std::endl;
             std::cout << "Tree don't exist" << std::endl;
@@ -150,19 +155,22 @@ public:
             std::cout << "MaxWay is: " << maxWay;
         }
         else {
-            if (node->count_sons == 1 or node->count_sons == 0) { 
-                waySize++;
-            if (node->count_sons!=1 and waySize>maxWay) {
-                cur = node;
-                maxWay = waySize;
-                for (size_t i{}; i < way.size(); i++) {
-                    way.remove(i);
-                }
-                for (size_t i{}; i < maxWay; i++) {
-                    way.pushBack(cur->data);
-                    cur = cur->father;         // вопросики
-                }
+            if (node->count_sons == 1 or node->count_sons == 0) {
+                waySize++;                                    /* Проверяем, нет ли ветвления (т.е. у дерева либо 1 сын, либо оно лист),
+                                                              добовляем 1 к длинне пути*/
             }
+            if (node->count_sons!=1 and waySize>maxWay) {     // Если встретели развилку или лист, путь заканчиваеться
+                cur = node;
+                maxWay = waySize;                             // Если длинна пути, по которому прошли больше самого длинного, то меняем самый длинный
+                waySize = 0;
+                std::cout << "Tree longest way: " << way << std::endl;
+                for (size_t i{}; i < way.size(); i++) {
+                    way.remove(i);                            // Очищаем массив длинны пути
+                }
+                for (size_t i{}; i < maxWay; i++) {           // От конца пути к началу запоминаем 
+                    way.pushBack(cur->data);
+                    cur = cur->father;         
+                }
             }
         }
         for (size_t i{}; i < node->count_sons; i++) {
@@ -186,55 +194,3 @@ int main()
     }
     return 0;
 }
-
-//class Tree
-//{
-//public:
-//    int val;
-//    struct Node {
-//        Node(int data_, Node* Bro, Node* _son, Node*) : data(data_), father(nullptr) {}
-//        int data;
-//        Node* father;
-//        Node* son;
-//        Node* brother;
-//    };
-//    Node* root = nullptr;
-//    Tree() : root(nullptr), val() {};
-//    ~Tree();
-//
-//
-//    //Функция isEmpty
-//    //Возвращает нулевой указатель у корня дерева, если дерево пусто
-//    bool isEmpty()
-//    {
-//        return root == nullptr;
-//    }
-//
-//    //Функция addNode
-//    //Принимает на вход количество сыновей, узел дерева
-//    //Функция добавляет новый узел дерева
-//    void addNode(Node* Son, Node* Bro, Node* Father, Node* node = nullptr) {
-//        if (isEmpty())                                     //В дереве нет корня
-//            {
-//                std::cout << "--------------------------------------------------------" << std::endl;
-//                std::cout << "Set Root:\n";
-//                val = userInput();
-//                if (val == 0)                                           //Если значение равно нулю, то корня не существует 
-//                {
-//                    root = nullptr;
-//                }
-//                else
-//                {
-//                    std::cout << "--------------------------------------------------------" << std::endl;
-//                    root = new Node(val, nullptr,  );
-//                    addNode()
-//                }
-//            }
-//        else if (!isEmpty())
-//    }
-//
-//};
-//
-//Tree::~Tree()
-//{
-//}
